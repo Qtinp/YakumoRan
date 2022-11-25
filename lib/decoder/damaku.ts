@@ -1,33 +1,30 @@
+import { decode } from 'html-entities'
 import { Bot } from '../event'
 
 export interface Damaku {
-  username: string,
-  avatar: string,
-  message: string,
-  color: string,
+  username: string
+  avatar: string
+  message: string
+  color: string
+  gender: number
+  timestamp: number
 }
 
 export default (message: string) => {
-  if (message.substr(0, 1) === '=') {
-    const list = message.substr(1).split('<').map(item => item.split('>'))
-
-    let status = false
-
-    for (const item of list) {
-      if (item.length === 6) {
-        const msg = {
-          username: item[0],
-          avatar: item[5],
-          message: item[1],
-          color: item[2]
-        }
-
-        Bot.emit('damaku', msg)
-
-        status = true
+  if (message.slice(0, 1) === '=') {
+    const tmp = message.slice(1).split('>')
+    if (tmp.length === 8) {
+      const msg = {
+        username: decode(tmp[0]),
+        message: tmp[1],
+        color: tmp[2],
+        gender: Number(tmp[4]),
+        avatar: tmp[5],
+        timestamp: Number(tmp[6])
       }
-    }
 
-    return status
+      Bot.emit('damaku', msg)
+      return true
+    }
   }
 }
